@@ -12,13 +12,15 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
 	counts := make(map[string]int)
+	dupfiles := make(map[string]string)
 	files := os.Args[1:]
 	if len(files) == 0 {
-		countLines(os.Stdin, counts)
+
 	} else {
 		for _, arg := range files {
 			f, err := os.Open(arg)
@@ -26,23 +28,42 @@ func main() {
 				fmt.Fprintf(os.Stderr, "dup2: %v\n", err)
 				continue
 			}
-			countLines(f, counts)
+			countLines(f, counts, dupfiles, arg)
 			f.Close()
 		}
 	}
+	for line, s := range dupfiles {
+		ss := strings.Split(s, " ")
+		ss = removeDuplicate1(ss)
+		dupfiles[line] = strings.Join(ss, " ")
+	}
 	for line, n := range counts {
 		if n > 1 {
-			fmt.Printf("%d\t%s\n", n, line)
+			fmt.Printf("%d\t%s\t%s\n", n, line, dupfiles[line])
 		}
 	}
 }
 
-func countLines(f *os.File, counts map[string]int) {
+func countLines(f *os.File, counts map[string]int, dupfiles map[string]string, filename string) {
 	input := bufio.NewScanner(f)
+	sep := " "
 	for input.Scan() {
 		counts[input.Text()]++
+		dupfiles[input.Text()] += sep + filename
 	}
 	// NOTE: ignoring potential errors from input.Err()
+}
+
+func removeDuplicate1(args []string) []string {
+	results := make([]string, 0, len(args))
+	encountered := map[string]bool{}
+	for i := 0; i < len(args); i++ {
+		if !encountered[args[i]] {
+			encountered[args[i]] = true
+			results = append(results, args[i])
+		}
+	}
+	return results
 }
 
 //!-
