@@ -6,34 +6,17 @@
 // Echo3 prints its command-line arguments.
 package main
 
-import (
-	"fmt"
-	"os"
-	"strings"
-	"time"
-)
+import "strings"
 
-//!+
-func main() {
-	num := 1000000
-	start1 := time.Now()
-	for i := 0; i < num; i++ {
-		fmt.Println(strings.Join(os.Args[1:], " "))
+func joinwithfor(args []string) string {
+	var s, sep string
+	for i := 1; i < len(args); i++ {
+		s += sep + args[i]
+		sep = " "
 	}
-
-	fmt.Printf("%.2f sec using strings.join\n", time.Since(start1).Seconds())
-
-	start2 := time.Now()
-	for i := 0; i < num; i++ {
-		var s, sep string
-		for i := 1; i < len(os.Args); i++ {
-			s += sep + os.Args[i]
-			sep = " "
-		}
-		fmt.Println(s)
-	}
-
-	fmt.Printf("%.2f sec using xxx\n", time.Since(start2).Seconds())
+	return s
 }
 
-//!-
+func joinofstrings(args []string) string {
+	return strings.Join(args[1:], " ")
+}
